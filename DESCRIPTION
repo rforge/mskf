@@ -1,9 +1,0 @@
-Package: mskf
-Type: Package
-Title: Markov Switching Kalman filter
-Version: 1.1.2
-Authors@R: c(person(c("Ellen","L."), "Hamaker", role = c("aut","cre"), email = "e.l.hamaker@uu.nl"),
-						person(c("Raoul","P.","P.","P."), "Grasman", role = c("aut","cre"), email = "rgrasman@uva.nl"))
-Maintainer: Raoul P. P. P. Grasman <rgrasman@uva.nl>
-Description: Fitting a regime switching time series models using mixed Kalman and Hamilton filter.
-License: GPL 2.0

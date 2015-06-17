@@ -3,21 +3,21 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Fitting state-space models with Markov random regime switches} % DIT LIJKT ME GEEN GOEDE TITEL, MAAR WEET NIET WAT ANDERS: ZONDER DAT ESTIMATING A?
 \description{
-  Fit a regime switching state-space model to a (multivariate) time series. 
+  Fit a regime switching state-space model to a (multivariate) time series.
 }
 \usage{
-mskf(model, method = "L-BFGS-B", hessian = TRUE, control = list(trace = 3, maxit = 500), 
+mskf(model, method = "L-BFGS-B", hessian = TRUE, control = list(trace = 3, maxit = 500),
     debug = FALSE)
 }
 \arguments{
   \item{model}{Object returned by \code{\link{mskf.model}}}
   \item{method}{Optimization method to be used by \code{\link{optim}}}
   \item{hessian}{Logical. Should a numerically differentiated Hessian matrix be returned?}
-  \item{control}{A list of control parameters. See Details in \code{\link{optim}}} 
-  \item{debug}{ Logical. For debugging purposes. } 
+  \item{control}{A list of control parameters. See Details in \code{\link{optim}}}
+  \item{debug}{ Logical. For debugging purposes. }
 }
 \details{
-The \code{model} object describes a Markov regime switching state-space model for uni- or multivariate time series. The multivariate time series are assumed to be indicators for an underlying stochastic time series that is described by a state space model. The dynamics of the underlying series is assumed to switch between a discrete set of states, or regimes, each associated with their own set of parameters. Switching between regimes is modeled as a discrete time Markov chain. See \code{\link{mskf.model}} for a detail model specification. The (unconstraint) parameters and switching probabilities are estimated by means of maximum likelihood. 
+The \code{model} object describes a Markov regime switching state-space model for uni- or multivariate time series. The multivariate time series are assumed to be indicators for an underlying stochastic time series that is described by a state space model. The dynamics of the underlying series is assumed to switch between a discrete set of states, or regimes, each associated with their own set of parameters. Switching between regimes is modeled as a discrete time Markov chain. See \code{\link{mskf.model}} for a detail model specification. The (unconstraint) parameters and switching probabilities are estimated by means of maximum likelihood.
 
 Missing values are treated as discussed in the last reference.
 }
@@ -31,21 +31,21 @@ An object of class \code{mskf} with components returned by \code{\link{optim}}.
 
 \cite{Kim, C.-J., and Nelson, C. R. (1999). \emph{State-Space Models with Regime Switching:
  Classical and Gibbs-Sampling Approaches with Applications.} Cambridge, MIT press.}
- 
-\cite{Hamaker, E. L., and Grasman, R. P. P. P. (2011) .... Psychometrika, ?, ?--?.}  
+
+\cite{Hamaker, E. L., & Grasman, R. P. P. P. (2012). Regime Switching State-Space Models Applied To Psychological Processes: Handling Missing Data And Making Inferences. Psychometrika, 77:2, 400--422.}
 }
 
-\author{Ellen Hamaker and Raoul Grasman} 
+\author{Ellen L. Hamaker and Raoul P. P. P. Grasman}
 
-%\note{ ~~further notes~~ 
+%\note{ ~~further notes~~
 %
 % ~Make other sections like Warning with \section{Warning }{....} ~
 %}
 
-\seealso{ See Also as \code{\link{mskf.model}}, \code{\link{mskf.model.skeleton}}  }# HIER VERWIJZEN NAAR OPTIM?
+\seealso{ See Also as \code{\link{mskf.model}}, \code{\link{mskf.model.skeleton}, \code{\link{optim}}}  }% HIER VERWIJZEN NAAR OPTIM?
 
 %    # Univariate AR(1) with two regimes
-%    
+%
 %    # parameters
 %    phi01 = 0       # constant in regime 1
 %    phi02 = 3       # constant in regime 2
@@ -53,37 +53,37 @@ An object of class \code{mskf} with components returned by \code{\link{optim}}.
 %    phi12 = 0.3     # AR(1) parameter in regime 2
 %    rsd1  = 1       # residual standard deviation in regime 1
 %    rsd2  = 1       # residual standard deviation in regime 2
-%    
+%
 %    # number of time point and burn in
 %    nt = 150
 %    burn.in = 100
-%    
+%
 %    # Markov transition matrix
-%    p = matrix(c(.7,.3,.2,.8), 2, 2)	
+%    p = matrix(c(.7,.3,.2,.8), 2, 2)
 %    lp = eigen(p)$vectors[,1]
 %    lp = lp/sum(lp) # equilibrium regime distribution
-%    
+%
 %    true.par = c(phi01, phi02, phi11, phi12, rsd1, rsd2, log(p[1,1]/p[2,1]),
 %    	log(p[2,2]/p[1,2]))
-%  
+%
 %    # Create a discrete Markov series
 %    r = sample(1:2, 1, p = lp);
-%    for (t in 2:(nt+burn.in)) 
+%    for (t in 2:(nt+burn.in))
 %    	r[t] = sample(1:2, 1, prob = p[,r[t-1]]);
 %    y = rnorm(1)
-%    for (t in 2:(nt+burn.in)) 
+%    for (t in 2:(nt+burn.in))
 %    	y[t]  = if (r[t]==1)  phi01 + phi11 * y[t-1] + rnorm(1,0,rsd1) else
 %    		phi02 + phi12 * y[t-1] + rnorm(1,0,rsd2)
 %    y <- y[-(1:burn.in)]
-%    
-%    
+%
+%
 %    # Specify the model
 %    skel = mskf.model.skeleton(y, ne=1, nm=2)
 %    start = c(`1` = .05, `2` = 3, `3` = .51, `4` = .22, `5` = 1.5, `6` = 2,
 %    		`7` = 1, `8` = .5)
 %    mod = mskf.model(skel, pap = diag(7:8), paK = 5:6, pac = 1:2, paH = 3:4, start = start,
 %    	upper = 50, lower = -50)
-%    
+%
 %    # fit the model
 %    fitres <- mskf(mod,control=list(trace=3,maxit=2000),debug=0)
 

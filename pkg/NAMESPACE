@@ -1,9 +1,9 @@
 useDynLib(mskf)
 
-exportPattern(mskf, mskf.model, mskf.model.skeleton, as.mskf.model, sim.msar)
+export(mskf, mskfModel, mskfModelSkeleton, as.mskfModel, sim.msar)
 
-S3method(plot, mskf.model)
-S3method(print, mskf.model)
-S3method(coef, mskf.model)
-S3method(simulate, mskf.model)
-S3method(print, mskf.skeleton)
+S3method(plot, mskfModel)
+S3method(print, mskfModel)
+S3method(coef, mskfModel)
+#S3method(simulate, mskf.model)
+S3method(print, mskfSkeleton)

@@ -1,6 +1,7 @@
-print.mskf.skeleton <- 
-function(obj, ...)
+print.mskfSkeleton <-
+function(x, ...)
 {
+		obj = x
     with(obj, {
     cat("\nMarkov switching state space model skeleton\n\n", ...);
     cat("\nNumber of endogenous variables : ", ny, ...);

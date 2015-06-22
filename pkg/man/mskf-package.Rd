@@ -1,6 +1,5 @@
 \name{mskf-package}
 \alias{mskf-package}
-\alias{mskf}
 \docType{package}
 \title{
 \packageTitle{mskf}

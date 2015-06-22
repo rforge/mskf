@@ -1,5 +1,6 @@
 \name{mskf.model}
 \alias{mskf.model}
+\alias{print.mskf.model}
 
 \title{ Specify a Markov regime switching state-space model }
 \description{

@@ -1,4 +1,4 @@
-mskf.model.skeleton <- 
+mskfModelSkeleton <-
 function(y, ne=1, nm=2, x = NA, ipat = c(W=1,B=nx,R=0,c=2,H=2,G=1,K=2,p=2))
 {
     y = as.matrix(y)
@@ -34,6 +34,6 @@ function(y, ne=1, nm=2, x = NA, ipat = c(W=1,B=nx,R=0,c=2,H=2,G=1,K=2,p=2))
 			pattr[[pa]] = array(NA, d, dnam);
 	}
 	mdl <- list(const = const, pattern = pattr, y=y, x=x, ny=ny, nx=nx, nt=nt, ne=ne, nm=nm, ipat=ipat)
-	class(mdl) <- "mskf.skeleton"
+	class(mdl) <- "mskfSkeleton"
 	mdl
 }

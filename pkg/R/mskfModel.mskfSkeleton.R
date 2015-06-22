@@ -1,13 +1,13 @@
-mskf.model.mskf.skeleton <- function(mskf.skeleton, ..., start=NA, lower=NA, upper=NA)
+mskfModel.mskfSkeleton <- function(object, ..., start=NA, lower=NA, upper=NA)
 {
-    # 
-    obj = mskf.skeleton
+    #
+    obj = object
     inits = list(...);
     nmconst = names(obj$const);
     nmpattr = names(obj$pattern);
     if (!all(chk <- names(inits) %in% c(nmconst, nmpattr)))
         warning("arguments ", names(inits)[!chk], " unused");
-    	
+
 
     # "attach" elements of x to the current environment
     for (nme in names(obj)) assign(nme, obj[[nme]]);
@@ -36,11 +36,11 @@ mskf.model.mskf.skeleton <- function(mskf.skeleton, ..., start=NA, lower=NA, upp
         pap = {tmp = matrix(npar+1,nm,nm); npar<-max(tmp,npar); tmp}
      )
      npar = npar - maxn + length(unique(unlist(inits[nmpattr])));
-        
-    
+
+
     # vectors for starting values, lower and upperbounds
     theta <- lobo <- upbo <- c()
-    
+
     # set values of skeleton matrices
     for(nme in nmconst){
         obj$const[[nme]][] = defc[[nme]];
@@ -48,10 +48,10 @@ mskf.model.mskf.skeleton <- function(mskf.skeleton, ..., start=NA, lower=NA, upp
             obj$const[[nme]][] = inits[[nme]];
     }
     for(nme in nmpattr){
-        len = length(obj$pattern[[nme]][]) 
+        len = length(obj$pattern[[nme]][])
         if(len & length(obj$pattern[[nme]][]) %% length(defp[[nme]]) !=0)
             stop("this shouldn't happen, you discovered a bug (", nme,")")
-        else 
+        else
             obj$pattern[[nme]][] = defp[[nme]];
         if(nme %in% names(inits))
             if(length(obj$pattern[[nme]][]) %% length(inits[[nme]]) !=0)
@@ -64,7 +64,7 @@ mskf.model.mskf.skeleton <- function(mskf.skeleton, ..., start=NA, lower=NA, upp
     theta.nms = na.omit(unique(unlist(obj$pattern)))
     theta.nms = theta.nms[as.character(theta.nms)!="0"]
     npar = length(theta.nms)
-    theta = rep(if (missing(start)) 1/npar else start, len = npar) 
+    theta = rep(if (missing(start)) 1/npar else start, len = npar)
     names(theta) = theta.nms
     # check provided starting values and set corresponding elements of theta to values provided
     if (!missing(start) && is.null(names(start))) {
@@ -73,7 +73,7 @@ mskf.model.mskf.skeleton <- function(mskf.skeleton, ..., start=NA, lower=NA, upp
     }
     if(!all(chk <- names(start) %in% theta.nms))
         warning("start value(s) named ", names(start)[!chk], " not used")
-    theta[names(start)[chk]] = start[chk] 
+    theta[names(start)[chk]] = start[chk]
 
     # construct lower and upper bounds similarly (treat variance parameters special)
     lobo = rep(if (missing(lower)) -10 else lower, len = npar)
@@ -85,15 +85,15 @@ mskf.model.mskf.skeleton <- function(mskf.skeleton, ..., start=NA, lower=NA, upp
     lobo[as.character(varpars)] = sqrt(.Machine$double.eps) # small number away from zero
     if(!all(chk <- names(lower) %in% theta.nms))
         warning("lower bound(s) named ", names(lower)[!chk], " not used")
-    lobo[names(lower)[chk]] = lower[chk] 
-    
+    lobo[names(lower)[chk]] = lower[chk]
+
     upbo = rep(if (missing(upper)) 10 else upper, len = npar)
     names(upbo) = theta.nms
     if(!all(chk <- names(upper) %in% theta.nms))
         warning("upper bound(s) named ", names(upper)[!chk], " not used")
-    upbo[names(upper)[chk]] = upper[chk] 
+    upbo[names(upper)[chk]] = upper[chk]
 
-    
+
     # initial state and its covariance matrix
     a0 = rep(0, ne)           # LET OP: DIT MOET JE EIGENLIJK VOOR ALLE REGIMES EEN KEER OPGEVEN
     ##a0 = array(a0, c(ne,  1, nm))   # doen dan dus maar? lijkt een probleem te veroorzaken
@@ -101,6 +101,6 @@ mskf.model.mskf.skeleton <- function(mskf.skeleton, ..., start=NA, lower=NA, upp
     ##P0 = array(P0, c(ne, ne, nm))   # ook maar doen dan?? lijkt een probleem te veroorzaken
 
     obj = c(obj, list(theta = theta, lobo = lobo, upbo = upbo, a0 = a0, P0 = P0));
-    class(obj) = 'mskf.model'
+    class(obj) = 'mskfModel'
     obj
 }

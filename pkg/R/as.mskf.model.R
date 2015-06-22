@@ -1,1 +1,0 @@
- as.mskf.model <- function(x){class(x)='mskf.model';x}

@@ -1,4 +1,4 @@
-plot.mskfModel <- function(x, cex = 3.5, length=0.1, col = 1:mdl$nm) {
+plot.mskfModel <- function(x, cex = 3.5, length=0.1, col = 1:mdl$nm, ...) {
 	mdl = x
 	plot.new()
 	plot.window(c(-2,1), c(-1.25,1))

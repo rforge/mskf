@@ -1,7 +1,7 @@
 \name{mskf}
 \alias{mskf}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Fitting state-space models with Markov random regime switches} % DIT LIJKT ME GEEN GOEDE TITEL, MAAR WEET NIET WAT ANDERS: ZONDER DAT ESTIMATING A?
+\title{Fit A Markov Switching State-Space Model} % DIT LIJKT ME GEEN GOEDE TITEL, MAAR WEET NIET WAT ANDERS: ZONDER DAT ESTIMATING A?
 \description{
   Fit a regime switching state-space model to a (multivariate) time series.
 }
@@ -10,14 +10,14 @@ mskf(model, method = "L-BFGS-B", hessian = TRUE, control = list(trace = 3, maxit
     debug = FALSE)
 }
 \arguments{
-  \item{model}{Object returned by \code{\link{mskf.model}}}
+  \item{model}{Object returned by \code{\link{mskfModel}}}
   \item{method}{Optimization method to be used by \code{\link{optim}}}
   \item{hessian}{Logical. Should a numerically differentiated Hessian matrix be returned?}
   \item{control}{A list of control parameters. See Details in \code{\link{optim}}}
   \item{debug}{ Logical. For debugging purposes. }
 }
 \details{
-The \code{model} object describes a Markov regime switching state-space model for uni- or multivariate time series. The multivariate time series are assumed to be indicators for an underlying stochastic time series that is described by a state space model. The dynamics of the underlying series is assumed to switch between a discrete set of states, or regimes, each associated with their own set of parameters. Switching between regimes is modeled as a discrete time Markov chain. See \code{\link{mskf.model}} for a detail model specification. The (unconstraint) parameters and switching probabilities are estimated by means of maximum likelihood.
+The \code{model} object describes a Markov regime switching state-space model for uni- or multivariate time series. The multivariate time series are assumed to be indicators for an underlying stochastic time series that is described by a state space model. The dynamics of the underlying series is assumed to switch between a discrete set of states, or regimes, each associated with their own set of parameters. Switching between regimes is modeled as a discrete time Markov chain. See \code{\link{mskfModel}} for a detail model specification. The (unconstraint) parameters and switching probabilities are estimated by means of maximum likelihood.
 
 Missing values are treated as discussed in the last reference.
 }
@@ -42,7 +42,7 @@ An object of class \code{mskf} with components returned by \code{\link{optim}}.
 % ~Make other sections like Warning with \section{Warning }{....} ~
 %}
 
-\seealso{ See Also as \code{\link{mskf.model}}, \code{\link{mskf.model.skeleton}, \code{\link{optim}}}  }% HIER VERWIJZEN NAAR OPTIM?
+\seealso{ See Also as \code{\link{mskfModel}}, \code{\link{mskfModelSkeleton}}, \code{\link{optim}}  }% HIER VERWIJZEN NAAR OPTIM?
 
 %    # Univariate AR(1) with two regimes
 %
@@ -98,8 +98,8 @@ G = array(c(1, 1), dim = c(1,1,2))
 p = matrix(c(0.7, 0.3, 0.2, 0.8), 2, 2)
 
 # specify model
-skel = mskf.model.skeleton(rnorm(100), ne = 1, nm = 2)
-mdl = mskf.model(skel, map = p, maH = H, maG = G)
+skel = mskfModelSkeleton(rnorm(100), ne = 1, nm = 2)
+mdl = mskfModel(skel, map = p, maH = H, maG = G)
 
 # simulate from model
 sim = simulate(mdl, nt=100)
@@ -108,14 +108,14 @@ y = sim$y;
 ## estimate model parameters
 
 # set up model skeleton for simulated data
-skel2 = mskf.model.skeleton(y, ne = 1, nm = 2)
+skel2 = mskfModelSkeleton(y, ne = 1, nm = 2)
 
 # build model and initialize starting values
-mdl2 = mskf.model(skel2, pap = diag(7:8), paK = 5:6, pac=1:2, paH=3:4, upper = 50, lower = -50)
-start(mdl2, 'pac') = c(.05, 3)
-start(mdl2, 'paH') = c(.51, .22)
-start(mdl2, 'paK') = c(1.5, 2)
-start(mdl2, 'pap') = diag(c(1,.5))
+mdl2 = mskfModel(skel2, pap = diag(7:8), paK = 5:6, pac=1:2, paH=3:4, upper = 50, lower = -50)
+startValues(mdl2, 'pac') = c(`1` = .05, `2` = 3)
+startValues(mdl2, 'paH') = c(`3` = .51, `4` = .22)
+startValues(mdl2, 'paK') = c(`5` = 1.5, `6` = 2)
+startValues(mdl2, 'pap') = diag(c(1,.5))
 
 # fit the model
 mskf(mdl2)
@@ -132,29 +132,25 @@ R = array(c(diag(1,4), diag(1.2,4)), dim = c(4,4,2))
 # simulate from model
 y = matrix(rnorm(100*4),100) # data place holder
 x = rep(1, 100)
-skel3 = mskf.model.skeleton(y, ne = 1, nm = 2, x=x, ipat=c(W=2,B=2,R=2,H=2,c=2,G=1,K=2,p=2))
-mdl3 = mskf.model(skel3, map = p, mac = c, maH = H, maB=m, maG = G, maW = W, maR = R)
+skel3 = mskfModelSkeleton(y, ne = 1, nm = 2, x=x, ipat=c(W=2,B=2,R=2,H=2,c=2,G=1,K=2,p=2))
+mdl3 = mskfModel(skel3, map = p, mac = c, maH = H, maB=B, maG = G, maW = W, maR = R)
 sim = simulate(mdl3)
 y = sim$y
 
 # set up model skeleton for simulated data
-skel4 = mskf.model.skeleton(y, ne = 1, nm = 2, x=x, ipat=c(W=2,B=2,R=2,H=2,c=2,G=1,K=2,p=2))
+skel4 = mskfModelSkeleton(y, ne = 1, nm = 2, x=x, ipat=c(W=2,B=2,R=2,H=2,c=2,G=1,K=2,p=2))
 
 # build model and initialize starting values
-mdl4 = mskf.model(skel4, paW = rep(0:3,2), paB = 4:7, paR = c(diag(8:11),diag(12:15)),
+mdl4 = mskfModel(skel4, paW = rep(0:3,2), paB = 4:7, paR = c(diag(8:11),diag(12:15)),
 	paH = 16:17, pac = c(0,18),paK = 19:20, pap = diag(21:22))
 
-start(mdl4, 'paW')[] = c(0,.8, .6, .4)
-start(mdl4, 'paB')[] = rep(10, 4)
-start(mdl4, 'paR')[] = rep(1, 8)
-start(mdl4, 'paH')[] = c(.5, .2)
-start(mdl4, 'pac')[] = 3
-start(mdl4, 'paK')[] = c(1,1)
-start(mdl4, 'pap')[] = c(.8, 1.4)
+startValues(mdl4, 'paW')[] = c(0,.8, .6, .4)
+startValues(mdl4, 'paB')[] = rep(10, 4)
+startValues(mdl4, 'paR')[] = rep(1, 8)
+startValues(mdl4, 'paH')[] = c(.5, .2)
+startValues(mdl4, 'pac')[] = 3
+startValues(mdl4, 'paK')[] = c(1,1)
+startValues(mdl4, 'pap')[] = c(.8, 1.4)
 
 
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

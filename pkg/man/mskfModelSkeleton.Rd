@@ -1,14 +1,15 @@
-\name{mskf.model.skeleton}
-\alias{mskf.model.skeleton}
+\name{mskfModelSkeleton}
+\alias{mskfModelSkeleton}
+\alias{print.mskfSkeleton}
+
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Create a model skeleton for the specification of a state space model with
 regime switches for time series}
 \description{
-  This function generates a \code{mskf.skeleton} object to be used with \code{mskf.model}
+  This function generates a \code{mskfSkeleton} object to be used with \code{mskfModel}
   for the specification of a state space model with markovian switching between regimes.
 }
-\usage{ mskf.model.skeleton(y, ne = 1, nm = 2, x = NA, ipat = c(W = 1,\\
-    B = nx, R = 0, c = 2, H = 2, G = 1, K = 2, p = 2))
+\usage{ mskfModelSkeleton(y, ne = 1, nm = 2, x = NA, ipat = c(W = 1, B = nx, R = 0, c = 2, H = 2, G = 1, K = 2, p = 2))
 }
 \arguments{
   \item{y}{a univariate or multivariate time series (\code{\link{ts}})
@@ -87,54 +88,10 @@ Kim, C.-J., and Nelson, C. R. (1999). \emph{State-Space Models with Regime Switc
 \author{Ellen L. Hamaker and Raoul P. P. P. Grasman}
 
 \note{ The
-object returned by this function is to be used with \code{\link{mskf.model}} for full model specification. }
+object returned by this function is to be used with \code{\link{mskfModel}} for full model specification. }
 
-\seealso{See also \code{\link{mskf}}, \code{\link{mskf.model}} }
+\seealso{See also \code{\link{mskf}}, \code{\link{mskfModel}} }
 
-\examples{ ##---- Should be DIRECTLY executable !! ---- ##-- ==>
-Define data, use random, ##--	or do  help(data=index)  for the
-standard data sets.
-
-## The function is currently defined as
-function(y, ne=1, nm=2, x = NA, ipat = c(W=1,B=nx,R=0,c=2,H=2,G=1,K=2,p=2))
-{
-    y = as.matrix(y)
-    ny = ncol(y)
-    nt = nrow(y)
-    nx = if(is.na(x)) 0 else NCOL(x)
-    x  = as.matrix(x)
-
-    val.ipat.nms = c("W", "B", "R", "c", "H", "G", "K", "p")
-    if(!all(names(ipat) \%in\% val.ipat.nms)||!all(val.ipat.nms \%in\% names(ipat)))
-        stop('ipat should have elements named "W", "B", "R", "c", "H", "G", "K", "p"')
-
-	dims = list(
-		W = c(ny, ne, nm),
-		B = c(ny, nx, nm),
-		R = c(ny, ny, nm),
-		c = c(ne,  1, nm),
-		H = c(ne, ne, nm),
-		G = c(ne, ne, nm),
-		K = c(ne, ne, nm),
-		p = c(nm, nm)
-	)
-	const = list();
-	pattr = list();
-	for(nam in names(ipat)){
-		pa = paste("pa",nam,sep="")
-		ma = paste("ma",nam,sep="")
-		if(ipat[nam]>=1)
-			const[[ma]] = array(NA, dims[[nam]]);
-		if(ipat[nam]==2)
-			pattr[[pa]] = array(NA, dims[[nam]]);
-	}
-	mdl <- list(const = const, pattern = pattr, y=y, x=x, ny=ny, nx=nx,
-				nt=nt, ne=ne, nm=nm, ipat=ipat)
-	class(mdl) <- "mskf.skeleton"
-	mdl
-  }
+\examples{
+1:10
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

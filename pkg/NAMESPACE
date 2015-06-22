@@ -1,9 +1,20 @@
+importFrom(stats,simulate)
 useDynLib(mskf)
 
-export(mskf, mskfModel, mskfModelSkeleton, as.mskfModel, sim.msar)
+export(mskf, mskfModel, mskfModelSkeleton, as.mskfModel, sim.msar,
+			 simulate.mskfModel, startValues, "startValues<-", "lower<-",
+			 "upper<-", lower, upper)
+exportPattern('[mp]a[WcHGKp]')
 
 S3method(plot, mskfModel)
 S3method(print, mskfModel)
 S3method(coef, mskfModel)
-#S3method(simulate, mskf.model)
+S3method(simulate, mskfModel)
 S3method(print, mskfSkeleton)
+S3method(mskfModel,mskfSkeleton)
+S3method("startValues<-", mskfModel)
+S3method("startValues", "mskfModel")
+S3method("lower",mskfModel)
+S3method("lower<-",mskfModel)
+S3method("upper",mskfModel)
+S3method("upper<-",mskfModel)

@@ -2,7 +2,7 @@ print.mskfModel <-
 function (x, ...)
 {
 		obj = x
-    print.mskf.skeleton(obj, ...)
+    print.mskfSkeleton(obj, ...)
     cat("\n\nMarkov switching state space model specification\n\n")
     cat("Fixed values\n")
     for (i in names(obj$const)) {

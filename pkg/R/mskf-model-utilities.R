@@ -10,7 +10,8 @@ for (a in c("W", "B", "R", "c", "H", "G", "K", "p")) {
 }
 "pap<-" = function(x, value) { x$pattern$pap[] = if (is.array(value)) value else aperm(array(value, dim=dim(x$pattern$pap)), c(2,1)); x }
 "map<-"  = function(x, value) { x$const$map[] = if (is.array(value)) value else aperm(array(value, dim=dim(x$const$map)), c(2,1)); x }
-start.mskf.model = function(x, i) {
+startValues = function(x, i, ...) UseMethod("startValues")
+startValues.mskfModel = function(x, i, ...) {
 	if (missing(i)) {
 		x$theta;
 	}
@@ -23,8 +24,8 @@ start.mskf.model = function(x, i) {
 	}
 	else x$theta[i];
 }
-"start<-" <- function (x, ...) UseMethod("start<-")
-"start<-.mskf.model" = function(x, i, value, ...) {
+"startValues<-" <- function (x, i, value) UseMethod("startValues<-")
+"startValues<-.mskfModel" = function(x, i, value) {
 	if (missing(i)) {
 		if (!is.null(names(value))) {
 			x$theta[names(value)] = value;
@@ -56,7 +57,7 @@ start.mskf.model = function(x, i) {
 	else x$theta[i] = value;
 	x;
 }
-lower.mskf.model = function(x, i) {
+lower.mskfModel = function(x, i) {
 	if (missing(i)) {
 		x$lobo;
 	}
@@ -69,9 +70,9 @@ lower.mskf.model = function(x, i) {
 	}
 	else x$lobo[i];
 }
-"lower" <- function (x, ...) UseMethod("lower")
-"lower<-" <- function (x, ...) UseMethod("lower<-")
-"lower<-.mskf.model" = function(x, i, value) {
+"lower" <- function (x, i) UseMethod("lower")
+"lower<-" <- function (x, i, value) UseMethod("lower<-")
+"lower<-.mskfModel" = function(x, i, value) {
 	if (missing(i)) {
 		if (!is.null(names(value))) {
 			x$lobo[names(value)] = value;
@@ -103,7 +104,7 @@ lower.mskf.model = function(x, i) {
 	else x$lobo[i] = value;
 	x;
 }
-upper.mskf.model = function(x, i) {
+upper.mskfModel = function(x, i) {
 	if (missing(i)) {
 		x$upbo;
 	}
@@ -116,9 +117,9 @@ upper.mskf.model = function(x, i) {
 	}
 	else x$upbo[i];
 }
-"upper" <- function (x, ...) UseMethod("upper")
-"upper<-" <- function (x, ...) UseMethod("upper<-")
-"upper<-.mskf.model" = function(x, i, value) {
+"upper" <- function (x, i) UseMethod("upper")
+"upper<-" <- function (x, i, value) UseMethod("upper<-")
+"upper<-.mskfModel" = function(x, i, value) {
 	if (missing(i)) {
 		if (!is.null(names(value))) {
 			x$upbo[names(value)] = value;

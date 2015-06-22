@@ -1,1 +1,1 @@
-mskfModel <- function(object, ...) UseMethod("mskfModel");
+mskfModel <- function(object, ...) UseMethod("mskfModel")

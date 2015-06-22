@@ -1,6 +1,8 @@
-\name{mskf.model}
-\alias{mskf.model}
-\alias{print.mskf.model}
+\name{mskfModel}
+\alias{mskfModel}
+\alias{print.mskfModel}
+\alias{plot.mskfModel}
+\alias{as.mskfModel}
 
 \title{ Specify a Markov regime switching state-space model }
 \description{
@@ -8,15 +10,15 @@
 }
 
 \usage{
-    \method{mskf.model}{mskf.skeleton}(x, ...)
+    mskfModel(object, ...)
 }
 
 \arguments{
-  \item{x}{ A \code{\link{mskf.skeleton}} object. }
+  \item{object}{ A \code{mskfSkeleton} object returned by \code{\link{mskfModelSkeleton}}. }
   \item{\dots}{ Specifications of the model vectors and matrices. See Details below. }
 }
 \details{
-    The \code{x} object is a basic skeleton for a Markov regime switching state-space model for uni- or multivariate time series, the details of which are specified through this function. The time serie(s) is (are) assumed to be (an) indicator(s) for an underlying, (latent) stochastic state process that is described by a state space (vector autoregressive; VAR) model. Both uni- and multi-dimensional latent state spaces are supported. The dynamics of the latent series is assumed to switch between a discrete set of unobserved regimes, each associated with their own set of parameters. Switching between regimes is modeled with a Hidden Markov Model.
+    The \code{object} is a basic skeleton for a Markov regime switching state-space model for uni- or multivariate time series, the details of which are specified through this function. The time serie(s) is (are) assumed to be (an) indicator(s) for an underlying, (latent) stochastic state process that is described by a state space (vector autoregressive; VAR) model. Both uni- and multi-dimensional latent state spaces are supported. The dynamics of the latent series is assumed to switch between a discrete set of unobserved regimes, each associated with their own set of parameters. Switching between regimes is modeled with a Hidden Markov Model.
 
     Let \code{ny} be the number of (endogenous) observed time series, \code{ne} the dimension of the (latent) state process, \code{nm} the number of regimes, and \code{nx} be the number of exogonous time series. The regime switching state-space model consists of the measurement equation and the state transition equation, and a discrete Markov Chain.
 
@@ -26,7 +28,7 @@
     }{%
         y[t] = W(S[t]) a[t] + B(S[t]) x[t] + e[t]
     }
-    where \eqn{\mathbf{y}_t}{y[t]} is an \code{ny}-vector measurement made at occasion \eqn{t}; \eqn{\mathbf{a}_t}{a[t]} is an \code{ne}-vector (latent) state vector for occasion \eqn{t}; \eqn{\mathbf{x}_t}{x[t]} is an \code{nx}-vector with exogenous measurements; \eqn{W_{St}}{W(S[t])} is the \code{ny} by \code{ne} matrix with regression coefficients for predicting the observations from the states; \eqn{\mathbf{B}_{S_t}}{B(S[t])} is an \code{ny} by \code{nx} matrix with regression coefficients for \eqn{\amthbf{y}_t}{y[t]} from the exogenous measurements; and \eqn{\mathbf{e}_t \sim N(\mathbf{0}, \mathbf{R}_{S_t})}{e[t] ~ N(0, R(S[t]))}, \eqn{t = \ldots, -1, 0, 1, \ldots}, are \code{ny}-dimensional i.i.d. vectors.
+    where \eqn{\mathbf{y}_t}{y[t]} is an \code{ny}-vector measurement made at occasion \eqn{t}; \eqn{\mathbf{a}_t}{a[t]} is an \code{ne}-vector (latent) state vector for occasion \eqn{t}; \eqn{\mathbf{x}_t}{x[t]} is an \code{nx}-vector with exogenous measurements; \eqn{W_{St}}{W(S[t])} is the \code{ny} by \code{ne} matrix with regression coefficients for predicting the observations from the states; \eqn{\mathbf{B}_{S_t}}{B(S[t])} is an \code{ny} by \code{nx} matrix with regression coefficients for \eqn{y_t}{y[t]} from the exogenous measurements; and \eqn{\mathbf{e}_t \sim N(\mathbf{0}, \mathbf{R}_{S_t})}{e[t] ~ N(0, R(S[t]))}, \eqn{t = \ldots, -1, 0, 1, \ldots}, are \code{ny}-dimensional i.i.d. vectors.
 
     The transition equation for the states is given by
     \deqn{
@@ -77,11 +79,8 @@
 }
 \references{ \cite{Hamaker, E.L., & Grasman, R.P.P.P. (2011) ..., Psychometrika, ?, ??--??.} }
 \author{ Ellen Hamaker & Raoul Grasman }
-%\note{ ~~further notes~~
-%
-% ~Make other sections like Warning with \section{Warning }{....} ~
-%}
-\seealso{ \code{mskf}, \code{\link{paW}}, \code{\link{pac}}, \code{\link{paH}}, \code{\link{paG}}, \code{\link{paK}}, \code{\link{pap}}, \code{\link{maW}}, \code{\link{mac}}, \code{\link{maH}}, \code{\link{maG}}, \code{\link{maK}}, \code{\link{map}}, \code{\link[=start.mskf.model]{start}}, \code{\link[=plot.mskf.model]{plot}} }
+
+\seealso{ \code{mskf}, \code{\link{paW}}, \code{\link{pac}}, \code{\link{paH}}, \code{\link{paG}}, \code{\link{paK}}, \code{\link{pap}}, \code{\link{maW}}, \code{\link{mac}}, \code{\link{maH}}, \code{\link{maG}}, \code{\link{maK}}, \code{\link{map}}, \code{\link[=startValues.mskfModel]{startValues}}, \code{\link[=plot.mskfModel]{plot}} }
 \examples{
     # simulate a time series
     y = ts(matrix(rnorm(200), ncol = 2));
@@ -91,24 +90,24 @@
     ##
 
     ## first a skeleton
-    skel = mskf.model.skeleton(y, ne = 2, nm = 2) # 2 latent state variables, 3 regimes
+    skel = mskfModelSkeleton(y, ne = 2, nm = 2) # 2 latent state variables, 3 regimes
 
     ## specify the details
-    mdl = mskf.model(skel)  # default: y[t] = a[t], same intercept across regimes,
-    print(mdl)              #          no cross-lagged influences, unit variance innovations,
-                            #          equal switching probabilities
+    mdl = mskfModel(skel)  # default: y[t] = a[t], same intercept across regimes,
+    print(mdl)             #          no cross-lagged influences, unit variance innovations,
+                           #          equal switching probabilities
 
     # freely estimate c across regimes
-    mdl = mskf.model(skel, pac = c(1, 2, 3, 4))
+    mdl = mskfModel(skel, pac = c(1, 2, 3, 4))
     print(mdl)
 
     # c free across regimes, a cross-lagged influence in one direction
-    mdl = mskf.model(skel, pac = c(1, 2, 3, 4), paH = c(5,6,0,7,8,9,0,10))
+    mdl = mskfModel(skel, pac = c(1, 2, 3, 4), paH = c(5,6,0,7,8,9,0,10))
     print(mdl)
     plot(mdl)
 
     # set (some) starting values
-    mdl = mskf.model(skel, pac = c(1, 2, 3, 4), paH = c(5,6,0,7,8,9,0,10),
+    mdl = mskfModel(skel, pac = c(1, 2, 3, 4), paH = c(5,6,0,7,8,9,0,10),
             start = c('1'=1, '2'=1, '3'=2, '4'=2, '5'=0.7, '8'=0.7))
 
     ##
@@ -128,7 +127,3 @@
     upper(mdl, "paH") = array(1, dim(paH(mdl)))
     lower(mdl, "paH") = array(-1, dim(paH(mdl)))
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line

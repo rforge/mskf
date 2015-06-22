@@ -34,18 +34,17 @@ The main functions for fitting a model to a multivariate time series (\code{mts}
 Maintainer: \packageMaintainer{mskf}
 }
 \references{
-Kim, C.J. (1994). Dynamic linear models with Markov-switching. \emph{Journal of Econometrics, 60}, 1–22.
+Kim, C.J. (1994). Dynamic linear models with Markov-switching. \emph{Journal of Econometrics, 60}, 1???22.
 
 Kim, C.-J., and Nelson, C. R. (1999). \emph{State-Space Models with Regime Switching:
  Classical and Gibbs-Sampling Approaches with Applications.} Cambridge, MIT press.
 
-Hamaker, E. L. & Grasman, R. P. P. P. (2012) Regime Switching State-Space Models Applied To Psychological Processes: Handling Missing Data And Making Inferences. \emph{Psychometrika, 77}:2, 400–422. URL \href{http://doi.org/10.1007/S11336-012-9254-8}{http://doi.org/10.1007/S11336-012-9254-8}
+Hamaker, E. L. & Grasman, R. P. P. P. (2012) Regime Switching State-Space Models Applied To Psychological Processes: Handling Missing Data And Making Inferences. \emph{Psychometrika, 77}:2, 400???422. URL \href{http://doi.org/10.1007/S11336-012-9254-8}{http://doi.org/10.1007/S11336-012-9254-8}
 }
 \keyword{ package }
 \seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+\code{\link[mskf]{mskf}}
 }
 \examples{
-~~ simple examples of the most important functions ~~
+1:10
 }

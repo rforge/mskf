@@ -1,5 +1,4 @@
-print.mskfSkeleton <-
-function(x, ...)
+print.mskfSkeleton <- function(x, ...)
 {
 		obj = x
     with(obj, {

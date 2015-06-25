@@ -1,5 +1,4 @@
-print.mskfModel <-
-function (x, ...)
+print.mskfModel <- function (x, ...)
 {
 		obj = x
     print.mskfSkeleton(obj, ...)

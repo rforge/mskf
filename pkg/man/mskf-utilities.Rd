@@ -36,7 +36,7 @@
 Utility Function For Handling And Manipulating \code{mskfModel} Objects.
 }
 \description{
-Extract model matrices from a \code{mskfModel} object.
+Extract model matrices from a \code{mskfModel} object. Assign values to model matrices in a \code{mskfModel} object.
 }
 \usage{
 paW(x)

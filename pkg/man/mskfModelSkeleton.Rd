@@ -9,7 +9,8 @@ regime switches for time series}
   This function generates a \code{mskfSkeleton} object to be used with \code{mskfModel}
   for the specification of a state space model with markovian switching between regimes.
 }
-\usage{ mskfModelSkeleton(y, ne = 1, nm = 2, x = NA, ipat = c(W = 1, B = nx, R = 0, c = 2, H = 2, G = 1, K = 2, p = 2))
+\usage{ mskfModelSkeleton(y, ne = 1, nm = 2, x = NA, ipat = c(W = 1, B = nx, R = 0, c = 2,
+        H = 2, G = 1, K = 2, p = 2))
 }
 \arguments{
   \item{y}{a univariate or multivariate time series (\code{\link{ts}})

@@ -9,9 +9,12 @@ mskfModel.mskfSkeleton <- function(object, ..., start=NA, lower=NA, upper=NA)
         warning("arguments ", names(inits)[!chk], " unused");
 
 
-    # "attach" elements of x to the current environment
+    # "attach" elements of x to the current environment ## <-- obsolete
     for (nme in names(obj)) assign(nme, obj[[nme]]);
-
+  missingStart = missing(start)
+  missingUpper = missing(upper)
+  missingLower = missing(lower)
+	with(obj, {
     # default values
     defc = list(
         maW = diag(max(ny,ne))[1:ny, 1:ne],
@@ -64,10 +67,10 @@ mskfModel.mskfSkeleton <- function(object, ..., start=NA, lower=NA, upper=NA)
     theta.nms = na.omit(unique(unlist(obj$pattern)))
     theta.nms = theta.nms[as.character(theta.nms)!="0"]
     npar = length(theta.nms)
-    theta = rep(if (missing(start)) 1/npar else start, len = npar)
+    theta = rep(if (missingStart) 1/npar else start, len = npar)
     names(theta) = theta.nms
     # check provided starting values and set corresponding elements of theta to values provided
-    if (!missing(start) && is.null(names(start))) {
+    if (!missingStart && is.null(names(start))) {
     	warning("start should be a named vector to initialize the estimated parameters");
     	names(start) = 1:length(start); # default names
     }
@@ -76,7 +79,7 @@ mskfModel.mskfSkeleton <- function(object, ..., start=NA, lower=NA, upper=NA)
     theta[names(start)[chk]] = start[chk]
 
     # construct lower and upper bounds similarly (treat variance parameters special)
-    lobo = rep(if (missing(lower)) -10 else lower, len = npar)
+    lobo = rep(if (missingLower) -10 else lower, len = npar)
     names(lobo) = theta.nms
     diagR = rep(diag(ny)>0,nm);
     diagK = rep(diag(ne)>0,nm);
@@ -87,7 +90,7 @@ mskfModel.mskfSkeleton <- function(object, ..., start=NA, lower=NA, upper=NA)
         warning("lower bound(s) named ", names(lower)[!chk], " not used")
     lobo[names(lower)[chk]] = lower[chk]
 
-    upbo = rep(if (missing(upper)) 10 else upper, len = npar)
+    upbo = rep(if (missingUpper) 10 else upper, len = npar)
     names(upbo) = theta.nms
     if(!all(chk <- names(upper) %in% theta.nms))
         warning("upper bound(s) named ", names(upper)[!chk], " not used")
@@ -103,4 +106,5 @@ mskfModel.mskfSkeleton <- function(object, ..., start=NA, lower=NA, upper=NA)
     obj = c(obj, list(theta = theta, lobo = lobo, upbo = upbo, a0 = a0, P0 = P0));
     class(obj) = 'mskfModel'
     obj
+	})
 }

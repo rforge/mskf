@@ -1,8 +1,11 @@
 mskf.like <- function(model, debug=FALSE)
 {
-    for(nme in names(model))   assign(nme, model[nme][[1]])
-    for(nme in names(const))   assign(nme, const[nme][[1]])
-    for(nme in names(pattern)) assign(nme, pattern[nme][[1]])
+	const = model$const
+	pattern = model$pattern
+  #  for(nme in names(model))   assign(nme, model[nme][[1]])
+  #  for(nme in names(const))   assign(nme, const[nme][[1]])
+  #  for(nme in names(pattern)) assign(nme, pattern[nme][[1]])
+	with(c(model, const, pattern), {
     maxnpar <- length(model$theta)
     maxv <- max(ny,ne,nx,nm)
     MA <- array(,c(8,maxv,maxv,nm))
@@ -102,4 +105,5 @@ mskf.like <- function(model, debug=FALSE)
     opt<-filter.C(theta=theta,npar=npar,
         ny=ny, ne=ne, nx=nx, nt=nt, nm=nm, mdim=mdim, PA=PA, MA=MA, y=y, x=x, a0=a0, P0=P0,debug=debug)
     opt
+	})
 }

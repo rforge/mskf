@@ -20,13 +20,13 @@ function(   auc, au, ap,
 #	md[is.na(md)] <- -9999
 	if(any(c(is.na(W),is.na(B),is.na(R),is.na(c),is.na(H),is.na(G),is.na(K))))
 		stop('Arrays W, B, R, c, H, G, K should not contain NAs')
-	
+
     nt = dim(v)[1];
     ny = dim(v)[2];
     nm = dim(v)[3];
     ne = dim(au)[2];
     nx = dim(x)[2];
-    
+
     auc  = aperm(auc,  c(2:3,1))
     au   = aperm(au,   c(2:4,1))
     ap   = aperm(ap,   c(2:4,1))
@@ -53,7 +53,7 @@ retval = list(empty="failed")
 #on.exit(if(is.nan(retval$L)) print(retval));
 
     retval <-
-   .C("kfilter_timeloop", 
+   .C("kfilter_timeloop",
       as.integer(nt),
       as.integer(nm),
       as.integer(ne),
@@ -84,7 +84,7 @@ retval = list(empty="failed")
       x=as.double(x),
 	L=double(1),
       debug=as.integer(debug),
-      NAOK = TRUE)
+      NAOK = TRUE, PACKAGE = "mskf")
 
 	pf <- parent.frame();
 #    auc   <<- aperm(array(retval$auc,     c(ne,nm,nt+1)), c(3,1:2))

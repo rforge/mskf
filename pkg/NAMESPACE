@@ -1,5 +1,5 @@
 importFrom(stats,simulate)
-useDynLib(mskf)
+useDynLib(mskf,kfilter_timeloop)
 
 export(mskf, mskfModel, mskfModelSkeleton, as.mskfModel, sim.msar,
 			 simulate.mskfModel, startValues, "startValues<-", "lower<-",

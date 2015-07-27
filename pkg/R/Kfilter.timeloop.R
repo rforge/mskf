@@ -86,7 +86,7 @@
 				 debug=as.integer(debug),
 				 NAOK = TRUE, PACKAGE = "mskf")
 
-		if (debug != 0) cat("\n°°°°°Back in R°°°°°\n")
+		if (debug != 0) cat("\n~~~~~ Back in R ~~~~~\n")
 		pf <- parent.frame();
 		#    auc   <<- aperm(array(retval$auc,     c(ne,nm,nt+1)), c(3,1:2))
 		#    au    <<- aperm(array(retval$au,     c(ne,nm,nm,nt)), c(4,1:3))

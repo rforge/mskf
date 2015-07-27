@@ -254,6 +254,7 @@
 #define __Pp(i,j,k,l,m) (  Pp[(i<ne?i:Err("Pp",  1,i))   + ne*(j<ne  ?j:Err("Pp",  2,j))   + ne*ne*(k<nm  ?k:Err("Pp",  3,k))  + ne*ne*nm*(l<nm  ?l:Err("Pp", 4,l)) + ne*ne*nm*nm*(m<nt?m:Err("Pp",5,m))])
 #define __y(i,j)        (   y[(i<ny?i:Err("y",   1,i))   + ny*(j<nt  ?j:Err("y",   2,j))])
 #define __x(i,j)        (   x[(i<nx?i:Err("x",   1,i))   + nx*(j<nt  ?j:Err("x",   2,j))])
+#define __v1(i)         (  v1[(i<ny?i:Err("v1",  1,i))])
 
   // v =ny x nm x nm x nt
   // F = ny x ny x nm x nm x nt
@@ -276,6 +277,13 @@ int Err(const char *nme, int idx, int ival){
 	error("\nout of bound: %s, index %d = %d", nme, idx,ival);
 	return 0;
 }
+
+/*** The following functions can be used to check the
+ * correctness of the matrix multiplication macros.
+ * The symbols are loaded in R; a set of R access
+ * routines by the same name are defined in the mskf
+ * package (not to be used by the user).
+ */
 
 void addmat(int *nr, int *nc, double *A, double *B, double *C){
 	int k;
@@ -485,7 +493,7 @@ void kfilter_timeloop(
 		Rprintf("nt = %d\nne = %d\nnm = %d\nny = %d\nnx = %d\n", nt, ne, nm, ny, nx);
 		Rprintf_matrix("p[%d,%d] = %g\t", &_p(__,__), nm, nm);
 		for (i = 0; i < nm; i++) {
-			Rprintf("\n\nRegime %d\n========\n", i);
+			Rprintf("\n\nRegime %d\n========\n\n\n\ta[t] = c + H a[t-1] + G u[t],     u[t] ~ N(0, K)\n\ty[t] = W a[t] + B x[t] + e[t],    e[t] ~ N(0, R)\n\n", i);
 			Rprintf_matrix("H[%d,%d] = %12.6g\t", &_H(__, __, i), ne, ne); Rprintf("\n");
 			Rprintf_matrix("K[%d,%d] = %12.6g\t", &_K(__, __, i), ne, ne); Rprintf("\n");
 			Rprintf_matrix("G[%d,%d] = %12.6g\t", &_G(__, __, i), ne, ne); Rprintf("\n");
@@ -585,10 +593,6 @@ void kfilter_timeloop(
 
 				/*** ----------------- debug code ------------------- ***/
 				if(debug && i==0 && j==0) {
-					Rprintf_matrix("\t  c[%d,%d] = %12.6g", &_c(__, j),         ne,  1);  Rprintf("\n");
-					Rprintf_matrix("\t  H[%d,%d] = %12.6g", &_H(__, __, j),     ne, ne);  Rprintf("\n");
-					Rprintf_matrix("\tauc[%d,%d] = %12.6g", &__auc(__, i, t),   ne,  1);  Rprintf("\n");
-					Rprintf_matrix("\t ap[%d,%d] = %12.6g", &__ap(__, i, j, t), ne,  1);  Rprintf("\n");
 					Rprintf_matrix("\t  p[%d,%d] = %12.6g", &_p(__, __),        nm, nm);  Rprintf("\n");
 				}
 				/*** ----------------- end debug ------------------- ***/
@@ -599,18 +603,19 @@ void kfilter_timeloop(
 
 
 				/*** ----------------- debug code ------------------- ***/
-				if(debug && i == 0 && j == 0) {
+				if(debug) {
 					Rprintf("ap = c + H %*% auc\n");
-					Rprintf_matrix("\t  H[%d,%d] = %12.6g", &   _H(__, __, j),    ne, ne);  Rprintf("\n");
-					Rprintf_matrix("\tauc[%d,%d] = %12.6g", &__auc(__,  i, t),    ne, 1 );  Rprintf("\n");
-					Rprintf_matrix("\t ap[%d,%d] = %12.6g", & __ap(__,  i, j, t), ne, 1 );  Rprintf("\n");
+					Rprintf_matrix("\t  c[%d,%d] = %12.6g", &_c(__, j),         ne,  1);  Rprintf("\n");
+					Rprintf_matrix("\t  H[%d,%d] = %12.6g", &_H(__, __, j),     ne, ne);  Rprintf("\n");
+					Rprintf_matrix("\tauc[%d,%d] = %12.6g", &__auc(__, i, t),   ne,  1);  Rprintf("\n");
+					Rprintf_matrix("\t ap[%d,%d] = %12.6g", &__ap(__, i, j, t), ne,  1);  Rprintf("\n");
 				}
 				/*** ----------------- end debug ------------------- ***/
 
 
 				// HPucH = H * Puc * H'
 				a_matmulABAt(&_H(__, __, j), ne, ne, &__Puc(__, __, i, t), HPucH );                                                             // H[][][j] = H[0+ne*0+ne*ne*j], Puc[][][i][t] = Puc[0+ne*0+ne*ne*i+ne*ne*nm*t]
-				//
+				// GKG = G * K * G'
 				a_matmulABAt(&_G(__, __, j), ne, ne, &_K(__, __, j), GKG);                                                                // G[][][j] = G[0 + ne*0 + ne*ne*j], K[][][j] = K[0 + ne*0 + ne*ne*j]
 				// Pp = H * Puc * H'  + G * K * G'
 				a_mataddAB(HPucH, ne, ne, GKG, &__Pp(__, __, i, j, t));
@@ -631,7 +636,7 @@ void kfilter_timeloop(
 				/// ONE-STEP-AHEAD PREDICTION ERROR
 				// v1 = y - W * ap
 				if(!missing) {
-					a__x_plus_alpha_multAb(&__y(__, t), ny, -1.0, &_W(__, __, j), ne, &__ap(__, i, j, t), v1);                                                                 // y[][t] = y[0+ny*t], W[][][j] = W[0+ny*0+ny*ne*j], ap[][i][j][t] = ap[0+ne*i+ne*nm*j+ne*nm*nm*t],
+					a__x_plus_alpha_multAb(&__y(__, t), ny, -1.0, &_W(__, __, j), ne, &__ap(__, i, j, t), &__v1(__));                                                                 // y[][t] = y[0+ny*t], W[][][j] = W[0+ny*0+ny*ne*j], ap[][i][j][t] = ap[0+ne*i+ne*nm*j+ne*nm*nm*t],
 
 
 					/*** ----------------- debug code ------------------- ***/
@@ -640,13 +645,13 @@ void kfilter_timeloop(
 						Rprintf_matrix("\t  y[%d,%d] = %12.6g",  & __y(__,  t),       ny,  1); Rprintf("\n");
 						Rprintf_matrix("\t  W[%d,%d] = %12.6g",  &  _W(__, __, j),    ny, ne); Rprintf("\n");
 						Rprintf_matrix("\t ap[%d,%d] = %12.6g", &__ap(__,  i, j, t),  ne,  1); Rprintf("\n");
-						Rprintf_matrix("\t v1[%d,%d] = %12.6g", v1, ne, 1);
+						Rprintf_matrix("\t v1[%d,%d] = %12.6g", &__v1(__),            ny,  1);
 					}
 					/*** ----------------- end debug ------------------- ***/
 
 
 					// v = y - W * ap - B * x = v1 - B * x
-					a__x_plus_alpha_multAb(v1, ny, -1.0, &_B(__, __, j), nx, &__x(__, t), &__v(__, i, j, t));                                      // B[][][j] = B[0+ny*0+ny*nx*j], x[][t] = x[0+nx*t], v[][i][j][t] = v[0+ny*i+ny*nm*j+ny*nm*nm*t]
+					a__x_plus_alpha_multAb(&__v1(__), ny, -1.0, &_B(__, __, j), nx, &__x(__, t), &__v(__, i, j, t));                                      // B[][][j] = B[0+ny*0+ny*nx*j], x[][t] = x[0+nx*t], v[][i][j][t] = v[0+ny*i+ny*nm*j+ny*nm*nm*t]
 
 
 					/*** ----------------- debug code ------------------- ***/
@@ -658,22 +663,30 @@ void kfilter_timeloop(
 					}
 					/*** ----------------- end debug ------------------- ***/
 				}
+				else {
+					if(debug){
+						Rprintf("\n\tmissing values for y ==> au = ap\n");
+					}
+				}
 
 
 				/// COVARIANCE UPDATE
 				// PpW = Pp * W'
 				a_matmulABt(&__Pp(__, __, i, j, t), ne, ne, &_W(__, __, j), ny, PpW);                                                                // Pp[][][i][j][t] = Pp[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t], W[][][j] = W[0+ny*0+ny*ne*j]
+				// mmatmulABt(&ne, &ne, &__Pp(__, __, i, j, t), &_W(__, __, j), &ny, PpW);
 				// F = W Pp W' + R
 				a__X_plus_alpha_matmulAB(&_R(__, __, j), ny, ny, 1.0, &_W(__, __, j), ne, PpW, &__F(__, __, i, j, t));                        // R[][][j] = R[0+ny*0+ny*ny*j], W[][][j] = W[0+ny*0+ny*ne*j], F[][][i][j][t] = F[0+ny*0+ny*ny*i+ne*ne*nm*j+ne*ne*nm*nm*t]
 
 
 				/*** ----------------- debug code ------------------- ***/
 				if(debug){
-					Rprintf("F = W Pp W' + R\n");
+					Rprintf("F = W Pp W' + R = W PpW + R\n");
 					Rprintf_matrix("\t Pp[%d,%d] = %12.6g", &__Pp(__, __, i, j, t), ne, ne); Rprintf("\n");
-					Rprintf_matrix("\t  W[%d,%d] = %12.6g", &__Pp(__, __, i, j, t), ny, ne); Rprintf("\n");
-					Rprintf_matrix("\t  R[%d,%d] = %12.6g", & _R(__, __, j),        ny, ny); Rprintf("\n");
-					Rprintf_matrix("\t  F[%d,%d] = %12.6g", &__F(__, __, i, j, t),  ny, ny); Rprintf("\n");
+					Rprintf_matrix("\tPpW[%d,%d] = %12.6g",   PpW,                  ne, ny); Rprintf("\n");
+					//for (int ii=0; ii < ne*ny; ii++) {Rprintf("%12.6g ", PpW[ii]);}; Rprintf("\n");
+					Rprintf_matrix("\t  W[%d,%d] = %12.6g", &  _W(__, __, j),       ny, ne); Rprintf("\n");
+					Rprintf_matrix("\t  R[%d,%d] = %12.6g", &  _R(__, __, j),       ny, ny); Rprintf("\n");
+					Rprintf_matrix("\t  F[%d,%d] = %12.6g", & __F(__, __, i, j, t), ny, ny); Rprintf("\n");
 				}
 				/*** ----------------- end debug ------------------- ***/
 
@@ -683,9 +696,13 @@ void kfilter_timeloop(
 				///
 
 
-				if(missing) { // updated state with expected value under Markov-condition
+				if(missing) { // updated state with expected value under Martingale-condition
 					for(m=0;m<ne;m++){
 						__au(m, i, j, t) = __ap(m, i, j, t);
+					}
+					if(debug){
+						Rprintf("\n");
+						Rprintf_matrix("\tau[%d,%d] = %12.6g", &__au(__, i, j, t), ne, 1);
 					}
 				}
 				else {
@@ -697,26 +714,34 @@ void kfilter_timeloop(
 					/*** ----------------- debug code ------------------- ***/
 					if(debug){
 						Rprintf("\n");
-						Rprintf_matrix("\tFinv[%d,%d] = %12.6g", Finv, ny, ny); Rprintf("\n");
+						Rprintf_matrix("\tFinv[%d,%d] = %12.6g", &Finv[0], ny, ny); Rprintf("\n");
+						Rprintf("\t|F| = %12.6g\n", detF);
 					}
 					/*** ----------------- end debug ------------------- ***/
 
+					// PpWFinv = Pp W' Finv = PpW Finv
 					a_matmulAB(PpW, ne, ny, Finv, ny, PpWFinv);
 					// au = ap + Pp W Finv v
 					a__x_plus_alpha_multAb(&__ap(__, i, j, t), ne, 1.0, PpWFinv, ny, &__v(__, i, j, t), &__au(__, i, j, t));                                    // ap[][i][j][t] = ap[0+ne*i+ne*nm*j+ne*nm*nm*t], v[][i][j][t] = v[0+ny*i+ny*nm*j+ny*nm*nm*t], au[][i][j][t] = au[0+ne*i+ne*nm*j+ne*nm*nm*t];
 				}
 
-				// Pp - Pp W Finv W' Pp
-				a__X_plus_alpha_matmulABt(&__Pp(__, __, i, j, t), ne, ne, -1.0, PpWFinv, ny, PpW, &__Pu(__, __, i, j, t));                      // Pp[][][i][j][t] = Pp[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t], Pu[][][i][j][t] = Pu[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t]
-
+				// Pu = Pp + Pp W Finv W' Pp // was Pp - Pp W Finv W' Pp in earlier version, original R implementation specifies +
+				a__X_plus_alpha_matmulABt(&__Pp(__, __, i, j, t), ne, ne, 1.0, PpWFinv, ny, PpW, &__Pu(__, __, i, j, t));                      // Pp[][][i][j][t] = Pp[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t], Pu[][][i][j][t] = Pu[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t]
 
 				/*** ----------------- debug code ------------------- ***/
 				if(debug){
-					// Rprintf("\tPp = %g, PpWFinv = %g, PpW = %g, Pu = Pp + Pp * W * Finv * W' * Pp = %g\n", Pp[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t], PpWFinv[0], PpW[0], Pu[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t]);
-					Rprintf("au = ap + Pp W Finv v\n");
-					Rprintf_matrix("\tPu[%d,%d] = %12.6g", &__au(__, i, j, t), ne, 1);
-					Rprintf("Pu = Pp - Pp W Finv W' Pp\n");
-					Rprintf_matrix("\tPu[%d,%d] = %12.6g", &__Pu(__, __, i, j, t), ne, ne);
+					double *myPu;
+					a_new_matrix(myPu,   ne, ne);
+					a__X_plus_alpha_matmulABt(&__Pp(__, __, i, j, t), ne, ne, 1.0, PpWFinv, ny, PpW, myPu);
+					// Rprintf("\tPp = %g, PpWFinv = %g, PpW = %g, Pu = Pp + Pp * W' * Finv * W * Pp = %g\n", Pp[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t], PpWFinv[0], PpW[0], Pu[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t]);
+					Rprintf("au = ap + Pp W Finv v = ap + PpW Finv v\n");
+					Rprintf_matrix("\tPpWFinv[%d,%d] = %12.6g",  PpWFinv,               ne, ny); Rprintf("\n");
+					Rprintf_matrix("\t     au[%d,%d] = %12.6g", &__au(__, i, j, t),     ne,  1); Rprintf("\n");
+					Rprintf("Pu = Pp + Pp W Finv W' Pp\n"); // before this was Rprintf("Pu = Pp - Pp W Finv W' Pp\n");
+					Rprintf_matrix("\t     Pu[%d,%d] = %12.6g", &__Pu(__, __, i, j, t), ne, ne); Rprintf("\n");
+					Rprintf_matrix("\t   myPu[%d,%d] = %12.6g", myPu,                   ne, ne); Rprintf("\n");
+					a_free_matrix(myPu, ne);
+					Rprintf("freed myPu\n");
 				}
 				/*** ----------------- end debug ------------------- ***/
 
@@ -736,11 +761,14 @@ void kfilter_timeloop(
 
 					// conditional density
 					a_matmulASAt(&__v(__, i, j, t), 1, ny, &Finv[0], vtFinvv);            // v[][i][j][t] = v[0+ny*i+ny*nm*j+ny*nm*nm*nt]
-
+											/************
+											 * MOET HIER BOVEN NIET &__v, 1 EN ny OMGEDRAAID WORDEN MET &Finv[0], EN 1, ny EIGENLIJK ny, 1 ZIJN???? Het maakt niet uit omdat __v 1-dimensionaal is en i+j*ne = j+i*ne
+											************/
 
 					/*** ----------------- debug code ------------------- ***/
-					if(debug)
-						Rprintf("\n\t        v = %12.6g\n\t     Finv = %12.6g\n\tv' Finv v = %12.6g\n", __v(0, i, j, t), Finv[0], vtFinvv[0]);
+					if(debug) {
+						Rprintf("\n\t        v = %12.6g\n\tv' Finv v = %12.6g\n", __v(0, i, j, t), vtFinvv[0]);
+					}
 					/*** ----------------- end debug ------------------- ***/
 
 
@@ -748,9 +776,10 @@ void kfilter_timeloop(
 
 
 					/*** ----------------- debug code ------------------- ***/
-					if(debug)
+					if(debug) {
 						Rprintf("\njd[%d,%d] = tpr[%d,%d] * (2 * pi)^(ny/2) * exp(-0.5 * v' Finv v) / sqrt(det(F))", j, i, j, i);
-					Rprintf("\n\t             p = %12.6g\n\t            pr = %12.6g\n\t           tpr = %12.6g\n\t(2*pi)^(-ny/2) = %12.6g\n\t    vtFinvv[0] = %12.6g\n\t          detF = %12.6g\n\t       jd[%d,%d] = %12.6g\n", _p(j, i), __pr(i, t), __tpr(j,i,t), pow(M_2PI,-(double)ny/2.0), vtFinvv[0], detF, j, i, __jd(j, i, t));
+						Rprintf("\n\t             p = %12.6g\n\t            pr = %12.6g\n\t           tpr = %12.6g\n\t(2*pi)^(-ny/2) = %12.6g\n\t    vtFinvv[0] = %12.6g\n\t          detF = %12.6g\n\t       jd[%d,%d] = %12.6g\n", _p(j, i), __pr(i, t), __tpr(j,i,t), pow(M_2PI,-(double)ny/2.0), vtFinvv[0], detF, j, i, __jd(j, i, t));
+					}
 					/*** ----------------- end debug ------------------- ***/
 
 
@@ -767,7 +796,7 @@ void kfilter_timeloop(
 
 			/*** ----------------- debug code ------------------- ***/
 			if(debug)
-				Rprintf("\n\n              +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\t       missing = %12s\n\t    Likelihood = %12.6g\n\n", (missing?"TRUE":"FALSE"), L);
+				Rprintf("\n\n              +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n\t       missing = %12s\n\tlog-Likelihood = %12.6g\n\tjm             = %12.6g\n\n", (missing?"TRUE":"FALSE"), L, jm);
 			/*** ----------------- end debug ------------------- ***/
 
 

@@ -19,4 +19,5 @@ BuildType: Package
 PackageUseDevtools: Yes
 PackagePath: pkg
 PackageInstallArgs: --no-multiarch --with-keep.source
+PackageBuildArgs: -fsanitize=address
 PackageCheckArgs: --as-cran

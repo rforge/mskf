@@ -156,3 +156,141 @@ coef.mskfModel = function(object, ...) object$theta
 # "$.mskf.model" = function(x, i, value) {x[[i]]}
 
 
+addmat <- function(A, B){
+	if(!is.matrix(A) || !is.matrix(B)) stop('only matrices allowed')
+	if (!all(dim(A) == dim(B))) stop("non-conformable matrices")
+	nr = nrow(A)
+	nc = ncol(A)
+	C = A
+	res <- .C("addmat", as.integer(nr), as.integer(nc), as.double(A), as.double(B), as.double(C),
+		 NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, nc)
+}
+
+
+mmatmulABAt  <- function(A, B){
+	if(!is.matrix(A) || !is.matrix(B)) stop('only matrices allowed')
+	if (dim(A)[2] != dim(B)[1] || dim(B)[1] != dim(B)[2]) stop("non-conformable matrices")
+	nr = nrow(A)
+	nc = ncol(A)
+	C = matrix(0, nr, nr)
+	res <- .C("mmatmulABAt", as.integer(nr), as.integer(nc), as.double(A), as.double(B), as.double(C),
+						NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, nr)
+}
+
+
+mmatmulASAt <- function(A, S){
+	if(!is.matrix(A) || !is.matrix(S)) stop('only matrices allowed')
+	if(ncol(S) != nrow(S) || !all(S == t(S))) stop('`S` should be square symmetric.')
+	if(ncol(A) != ncol(S)) stop('non-conformable matrices')
+	nr = nrow(A)
+	nc = ncol(A)
+	C = matrix(0, nr, nr)
+	res <- .C("mmatmulASAt", as.integer(nr), as.integer(nc), as.double(A), as.double(S), as.double(C),
+						NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, nr)
+}
+
+mmatmulAB <- function(A, B){
+	if(!is.matrix(A) || !is.matrix(B)) stop('only matrices allowed')
+	if (dim(A)[2] != dim(B)[1]) stop("non-conformable matrices")
+	nr = nrow(A)
+	nc = ncol(A)
+	ncb= ncol(B)
+	C = matrix(0, nr, ncb)
+	res <- .C("mmatmulAB", as.integer(nr), as.integer(nc), as.double(A), as.double(B),
+						as.integer(ncb), as.double(C), NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, ncb)
+}
+
+
+mmatmulABt <- function(A, B){
+	if(!is.matrix(A) || !is.matrix(B)) stop('only matrices allowed')
+	if (dim(A)[2] != dim(B)[2]) stop("non-conformable matrices")
+	nr = nrow(A)
+	nc = ncol(A)
+	nrb= nrow(B)
+	C = matrix(0, nr, nrb)
+	res <- .C("mmatmulABt", as.integer(nr), as.integer(nc), as.double(A), as.double(B),
+						as.integer(nrb), as.double(C), NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, nrb)
+}
+
+mmatmulAtB <- function(A, B){
+	if(!is.matrix(A) || !is.matrix(B)) stop('only matrices allowed')
+	if (dim(A)[1] != dim(B)[1]) stop("non-conformable matrices")
+	nr = nrow(A)
+	nc = ncol(A)
+	ncb= ncol(B)
+	C = matrix(0, nc, ncb)
+	res <- .C("mmatmulAtB", as.integer(nr), as.integer(nc), as.double(A), as.double(B),
+						as.integer(ncb), as.double(C), NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nc, ncb)
+}
+
+mmataddAB <- function(A, B){
+	if(!is.matrix(A) || !is.matrix(B)) stop('only matrices allowed')
+	if (!all(dim(A) == dim(B))) stop("non-conformable matrices")
+	nr = nrow(A)
+	nc = ncol(A)
+	C = A
+	res <- .C("mmataddAB", as.integer(nr), as.integer(nc), as.double(A), as.double(B), as.double(C),
+						NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, nc)
+}
+
+mmataddABt <- function(A, B){
+	if(!is.matrix(A) || !is.matrix(B)) stop('only matrices allowed')
+	if (!all(dim(A) == dim(t(B)))) stop("non-conformable matrices")
+	nr = nrow(A)
+	nc = ncol(A)
+	C = A
+	res <- .C("mmataddABt", as.integer(nr), as.integer(nc), as.double(A), as.double(B), as.double(C),
+						NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, nc)
+}
+
+
+mx_plus_alpha_multAb <- function(x, alpha, A, b){
+	if(!is.matrix(A)) stop('only matrices allowed')
+	if (dim(A)[2] != length(b) || dim(A)[1] != length(x)) stop("non-conformable arrays")
+	nr = nrow(A)
+	nc = ncol(A)
+	C = x
+	res <- .C("mx_plus_alpha_multAb", as.double(x), as.integer(nr), as.double(alpha[1]),
+						as.double(A), as.integer(nc), as.double(b), as.double(C),
+						NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr)
+}
+
+mX_plus_alpha_multAB <- function(X, alpha, A, B){
+	if(!is.matrix(A) || !is.matrix(B) || !is.matrix(X))
+		stop('only matrices allowed')
+	if (dim(X)[1] == dim(A)[1] || dim(A)[2] != dim(B)[1] || dim(X)[2] != dim(B)[2])
+		stop("non-conformable arrays")
+	nr = nrow(X)
+	nc = ncol(X)
+	nca = ncol(A)
+	C = X
+	res <- .C("mX_plus_alpha_multAB", as.double(X), as.integer(nr), as.integer(nc),
+						as.double(alpha[1]), as.double(A), as.integer(nca), as.double(B), as.double(C),
+						NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, nc)
+}
+
+mX_plus_alpha_multABt <- function(X, alpha, A, B){
+	if(!is.matrix(A) || !is.matrix(B) || !is.matrix(X))
+		stop('only matrices allowed')
+	if (dim(X)[1] != dim(A)[1] || dim(A)[2] != dim(B)[2] || dim(X)[2] != dim(B)[1])
+		stop("non-conformable arrays")
+	nr = nrow(X)
+	nc = ncol(X)
+	nca = ncol(A)
+	C = X
+	res <- .C("mX_plus_alpha_multABt", as.double(X), as.integer(nr), as.integer(nc),
+						as.double(alpha[1]), as.double(A), as.integer(nca), as.double(B), as.double(C),
+						NAOK = FALSE, PACKAGE = "mskf")
+	matrix(res[[length(res)]], nr, nc)
+}
+

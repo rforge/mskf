@@ -700,10 +700,6 @@ void kfilter_timeloop(
 					for(m=0;m<ne;m++){
 						__au(m, i, j, t) = __ap(m, i, j, t);
 					}
-					if(debug){
-						Rprintf("\n");
-						Rprintf_matrix("\tau[%d,%d] = %12.6g", &__au(__, i, j, t), ne, 1);
-					}
 				}
 				else {
 					// inverse and determinant of covariance
@@ -762,13 +758,12 @@ void kfilter_timeloop(
 					// conditional density
 					a_matmulASAt(&__v(__, i, j, t), 1, ny, &Finv[0], vtFinvv);            // v[][i][j][t] = v[0+ny*i+ny*nm*j+ny*nm*nm*nt]
 											/************
-											 * MOET HIER BOVEN NIET &__v, 1 EN ny OMGEDRAAID WORDEN MET &Finv[0], EN 1, ny EIGENLIJK ny, 1 ZIJN???? Het maakt niet uit omdat __v 1-dimensionaal is en i+j*ne = j+i*ne
+											 * MOET HIER BOVEN NIET &__v, 1 EN ny OMGEDRAAID WORDEN MET &Finv[0], EN 1, ny EIGENLIJK ny, 1 ZIJN????
 											************/
 
 					/*** ----------------- debug code ------------------- ***/
-					if(debug) {
+					if(debug)
 						Rprintf("\n\t        v = %12.6g\n\tv' Finv v = %12.6g\n", __v(0, i, j, t), vtFinvv[0]);
-					}
 					/*** ----------------- end debug ------------------- ***/
 
 

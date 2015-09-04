@@ -178,6 +178,7 @@ Lp
 `filter.old` <-
   function(theta,npar,ny,ne,nx,nt,nm,mdim,MA,PA,a0,P0,y,x, debug=FALSE)
   {
+  	Debug = debug
     # START WITH MAKING THE ARRAYS THAT ARE NEEDED
     auc  <- array(0,c((nt + 1),ne,nm))     # a-updated and collapsed to nm posteriors
     au   <- array(0,c((nt),ne,nm,nm))      # a-updated (not collapsed: S(t-1)=i, S(t)=j)

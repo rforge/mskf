@@ -722,7 +722,8 @@ void kfilter_timeloop(
 				}
 
 				// Pu = Pp + Pp W Finv W' Pp // was Pp - Pp W Finv W' Pp in earlier version, original R implementation specifies +
-				a__X_plus_alpha_matmulABt(&__Pp(__, __, i, j, t), ne, ne, 1.0, PpWFinv, ny, PpW, &__Pu(__, __, i, j, t));                      // Pp[][][i][j][t] = Pp[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t], Pu[][][i][j][t] = Pu[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t]
+				// ==> changed back, apparently it really should be a '-' and not a '+', despite the original R implementation
+				a__X_plus_alpha_matmulABt(&__Pp(__, __, i, j, t), ne, ne, -1.0, PpWFinv, ny, PpW, &__Pu(__, __, i, j, t));                      // Pp[][][i][j][t] = Pp[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t], Pu[][][i][j][t] = Pu[0+ne*0+ne*ne*i+ne*ne*nm*j+ne*ne*nm*nm*t]
 
 				/*** ----------------- debug code ------------------- ***/
 				if(debug){
